@@ -89,12 +89,14 @@ public class QFragMasterEngine extends CommonMasterExecutionEngine implements Se
         JavaRDD<QFragEngine> execEngines = getExecutionEngines(configBC,0);
 
         execEngines.persist (StorageLevel.MEMORY_ONLY());
-        execEngines.foreachPartition(new VoidFunction<Iterator<QFragEngine>>() {
+        execEngines.foreachPartition(x -> {});
+
+/*        execEngines.foreachPartition(new VoidFunction<Iterator<QFragEngine>>() {
             @Override
             public void call(Iterator<QFragEngine> qFragEngineIterator) throws Exception {
 
             }
-        });
+        });*/
     }
 
     public void finalizeComputation() {
@@ -163,8 +165,9 @@ public class QFragMasterEngine extends CommonMasterExecutionEngine implements Se
         checkNull(computeFunction);
         checkSerializable(computeFunction);
 
+        logInfo("Before executors");
         JavaRDD<QFragEngine> executors = globalRDD.mapPartitionsWithIndex(computeFunction,false);
-
+        logInfo("After executors");
 
         return executors;
     }
@@ -200,7 +203,7 @@ public class QFragMasterEngine extends CommonMasterExecutionEngine implements Se
 }
 
 class ComputationFunction implements Function2<Integer, Iterator<QFragEngine>, Iterator<QFragEngine>>, Serializable {
-    private static final long serialVersionUID = 7526472295622776147L;
+    //private static final long serialVersionUID = 7526472295622776147L;
     /*        private static final long serialVersionUID = 7526472295622776147L;
             private int superstep;
             private Broadcast<String> inBC = null;
@@ -219,6 +222,8 @@ class ComputationFunction implements Function2<Integer, Iterator<QFragEngine>, I
     @Override
     public Iterator<QFragEngine> call(Integer partitionId, Iterator<QFragEngine> v2) throws Exception {
         //confBC.value().initialize();
+        System.out.println("I am inside computation func");
+
         QFragEngine engine = new QFragEngine(partitionId);//, this.superstep, inBC);
 
         engine.init();
